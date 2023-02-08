@@ -16,7 +16,14 @@ const {
 } = require("discord.js");
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
-const { token, client_id, test_guild_id } = require("./config.json");
+
+const { DisTube } = require("distube");
+const { YtDlpPlugin } = require("@distube/yt-dlp")
+const { token, client_id } = require("./config.json");
+const { Player } = require("discord-player");
+
+const { QuickDB } = require("quick.db");
+const db = new QuickDB();
 
 /**
  * From v13, specifying the intents is compulsory.
@@ -31,6 +38,8 @@ const client = new Client({
 		GatewayIntentBits.DirectMessages,
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.GuildVoiceStates
 	],
 	partials: [Partials.Channel],
 });
@@ -72,6 +81,12 @@ client.modalCommands = new Collection();
 client.cooldowns = new Collection();
 client.autocompleteInteractions = new Collection();
 client.triggers = new Collection();
+client.player = new Player(client);
+client.distube = new DisTube(client, {
+	plugins: [new YtDlpPlugin({ update: false })]
+});
+client.filters = {};
+client.db = db;
 
 /**********************************************************************/
 // Registration of Message-Based Legacy Commands.
@@ -235,7 +250,7 @@ for (const module of selectMenus) {
 /**********************************************************************/
 // Registration of Slash-Commands in Discord API
 
-const rest = new REST({ version: "9" }).setToken(token);
+const rest = new REST({ version: "10" }).setToken(token);
 
 const commandJsonData = [
 	...Array.from(client.slashCommands.values()).map((c) => c.data.toJSON()),
@@ -254,7 +269,7 @@ const commandJsonData = [
 			 * 2. Please comment the below (uncommented) line (for guild commands).
 			 */
 
-			Routes.applicationGuildCommands(client_id, test_guild_id),
+			//Routes.applicationGuildCommands(client_id, test_guild_id),
 
 			/**
 			 * Good advice for global commands, you need to execute them only once to update
@@ -262,7 +277,7 @@ const commandJsonData = [
 			 * to ensure they don't get re-deployed on the next restart.
 			 */
 
-			// Routes.applicationCommands(client_id)
+			Routes.applicationCommands(client_id),
 
 			{ body: commandJsonData }
 		);

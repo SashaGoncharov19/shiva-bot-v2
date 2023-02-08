@@ -1,20 +1,6 @@
-/**
- * @file Sample help command with slash command.
- * @author Naman Vrati & Thomas Fournier
- * @since 3.0.0
- * @version 3.3.0
- */
-
-// Deconstructed the constants we need in this file.
-
 const { EmbedBuilder, SlashCommandBuilder } = require("discord.js");
 
-/**
- * @type {import('../../../typings').SlashInteractionCommand}
- */
 module.exports = {
-	// The data needed to register slash commands to Discord.
-
 	data: new SlashCommandBuilder()
 		.setName("help")
 		.setDescription(
@@ -27,22 +13,12 @@ module.exports = {
 		),
 
 	async execute(interaction) {
-		/**
-		 * @type {string}
-		 * @description The "command" argument
-		 */
 		let name = interaction.options.getString("command");
 
-		/**
-		 * @type {EmbedBuilder}
-		 * @description Help command's embed
-		 */
 		const helpEmbed = new EmbedBuilder().setColor("Random");
 
 		if (name) {
 			name = name.toLowerCase();
-
-			// If a single command has been asked for, send only this command's help.
 
 			helpEmbed.setTitle(`Help for \`${name}\` command`);
 
@@ -59,8 +35,6 @@ module.exports = {
 					.setColor("Red");
 			}
 		} else {
-			// Give a list of all the commands
-
 			helpEmbed
 				.setTitle("List of all my slash commands")
 				.setDescription(
@@ -71,8 +45,6 @@ module.exports = {
 						"`"
 				);
 		}
-
-		// Replies to the interaction!
 
 		await interaction.reply({
 			embeds: [helpEmbed],
