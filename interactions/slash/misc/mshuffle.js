@@ -6,12 +6,12 @@ module.exports = {
 		.setDescription('Перемішати чергу.'),
 
 	async execute(interaction, client) {
-		const queue = client.player.getQueue(interaction.guild)
+		const queue = client.player.nodes.get(interaction.guild)
 
 		if (!queue)
 			return interaction.reply('Наразі ніяка пісня не грає.')
 
-		queue.shuffle()
-		interaction.reply(`🎶 | Черга з ${queue.tracks.length} пісень перемішана!`)
+		queue.tracks.shuffle()
+		interaction.reply(`🎶 | Черга з ${queue.tracks.lenght} пісень перемішана!`)
 	},
 };

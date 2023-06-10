@@ -18,46 +18,18 @@ module.exports = {
 					{ name: 'Замідлення', value: 'vaporwave' },
 					{ name: 'Звук лучів бластеру', value: 'phaser' },
 					{ name: 'Долітаючий звук', value: 'tremolo' },
-				))
-		.addStringOption((string) =>
-			string.setName('boolean')
-				.setDescription('Включити або виключити фільтр.')
-				.setRequired(true)
-				.addChoices(
-					{ name: 'Включити', value: '1' },
-					{ name: 'Виключити', value: '0' },
 				)),
 
 	async execute(interaction, client) {
 		await interaction.deferReply();
-		const queue = client.player.getQueue(interaction.guild);
+		const queue = client.player.nodes.get(interaction.guild);
 
 		const filter = interaction.options.getString('effect');
-		const status = interaction.options.getString('boolean');
 
 		if (!queue) return interaction.followUp('Наразі ніяка пісня не грає.')
 
-		client.filters[filter] = status === '1';
+		await queue.filters.ffmpeg.toggle(filter)
 
-		await queue.setFilters(client.filters)
-
-		const user = client.users.cache.find(account => account.id === client.application.id);
-
-		const embed = new EmbedBuilder()
-			.setColor('#0099ff')
-			.setTitle('Список задіяних фільтрів.')
-			.setThumbnail(user.avatarURL())
-			.setTimestamp()
-			.setFooter({ text: `${interaction.user.username}#${interaction.user.discriminator}`, iconURL: interaction.user.avatarURL() });
-
-		const array = [];
-
-		for (const [key, index] of Object.entries(client.filters)) {
-			array.push({name: key, value: index.toString()})
-		}
-
-		embed.addFields(...array);
-
-		await interaction.followUp({embeds: [embed]});
+		await interaction.followUp('Фільт включено/виключено!');
 	},
 };

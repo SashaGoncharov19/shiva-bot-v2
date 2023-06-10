@@ -81,7 +81,7 @@ client.modalCommands = new Collection();
 client.cooldowns = new Collection();
 client.autocompleteInteractions = new Collection();
 client.triggers = new Collection();
-client.player = new Player(client);
+client.player = Player.singleton(client);
 client.distube = new DisTube(client, {
 	plugins: [new YtDlpPlugin({ update: false })]
 });
@@ -269,7 +269,7 @@ const commandJsonData = [
 			 * 2. Please comment the below (uncommented) line (for guild commands).
 			 */
 
-			//Routes.applicationGuildCommands(client_id, test_guild_id),
+			// Routes.applicationGuildCommands(client_id, test_guild_id),
 
 			/**
 			 * Good advice for global commands, you need to execute them only once to update

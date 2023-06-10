@@ -1,5 +1,6 @@
 const { EmbedBuilder, SlashCommandBuilder } = require("discord.js");
 const { QueryType } = require("discord-player");
+const { useMasterPlayer } = require('discord-player');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -10,61 +11,52 @@ module.exports = {
 		.addStringOption((option) =>
 			option.setName('url')
 				.setDescription('Введіть URL або назву')
-				.setRequired(true)),
+				.setRequired(true)
+				.setAutocomplete(true)),
 
 	async execute(interaction, client) {
 		await interaction.deferReply();
 
-		console.log('hi');
+		await client.player.extractors.loadDefault();
 
-		const query = interaction.options.getString("url");
-		const queue = await client.player.createQueue(interaction.guild, {
+		const player = useMasterPlayer();
+		const query = interaction.options.getString("url", true);
+
+		const queue = await player.nodes.create(interaction.guild, {
 			ytdlOptions: {
 				filter: 'audioonly',
 				highWaterMark: 1 << 30,
 				dlChunkSize: 0,
 			},
-			metadata: interaction.channel
+			metadata: {
+				channel: interaction.channel,
+				client: interaction.guild.members.me,
+				requestedBy: interaction.user
+			},
+			leaveOnEmpty: false
 		});
-
-		console.log('hi 2');
 
 		try {
 			if (!queue.connection) await queue.connect(interaction.member.voice.channel);
 		} catch {
-			queue.destroy();
+			queue.delete();
 			return await interaction.followUp('Неможливо приєднатись до голосового каналу!');
 		}
 
-		console.log('hi 3');
-
 		try {
-			const result = await client.player.search(query, {
-				requestedBy: interaction.user,
-				searchEngine: QueryType.AUTO
-			});
-
-			console.log('hi 4');
+			const result = await player.search(query, { requestedBy: interaction.user });
 
 			if (!result) return await interaction.followUp(`Трек ${query} не знайдено!`);
 
-			console.log('hi 5');
+			result.playlist ? queue.addTrack(result.tracks) : queue.addTrack(result.tracks[0]);
 
-			result.playlist ? queue.addTracks(result.tracks) : queue.addTrack(result.tracks[0]);
-
-			console.log('hi 6');
-
-			if (!queue.playing) await queue.play();
+			if (!queue.node.isPlaying()) await queue.node.play();
 
 			const isPlayList = !!result.playlist;
 			const songList = isPlayList ? result.playlist : result.tracks[0];
 
-			console.log('hi 7');
-
 			const msgEmbed = isPlayList ? `**${result.tracks.length} пісень | [${songList.title}](${songList.url})** плейлист добавлений в чергу.`
 				: `**[${songList.title}](${songList.url})** добавлено в чергу.`;
-
-			console.log('hi 8');
 
 			const embed = new EmbedBuilder()
 				.setColor('#0099ff')
@@ -74,7 +66,6 @@ module.exports = {
 
 			await interaction.followUp({ embeds: [embed] });
 
-			console.log('hi 9');
 		} catch (e) {
 			console.log(e);
 		}

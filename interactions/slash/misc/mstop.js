@@ -10,12 +10,12 @@ module.exports = {
 	async execute(interaction, client) {
 		await interaction.deferReply();
 
-		const queue = client.player.getQueue(interaction.guild);
+		const queue = client.player.nodes.get(interaction.guild);
 
 		if (!queue)
 			return interaction.followUp('Наразі ніяка пісня не включена.')
 
-		queue.stop()
+		queue.delete()
 
 		await interaction.followUp('Музику виключено.');
 

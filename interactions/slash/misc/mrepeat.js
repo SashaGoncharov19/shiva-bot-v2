@@ -19,7 +19,7 @@ module.exports = {
 	async execute(interaction, client) {
 		await interaction.deferReply();
 
-		const queue = client.player.getQueue(interaction.guild);
+		const queue = client.player.nodes.get(interaction.guild);
 		const status = parseInt(interaction.options.getString('status'));
 
 		if (!queue)
@@ -27,13 +27,13 @@ module.exports = {
 
 		switch (status) {
 			case 0:
-				queue.setRepeatMode(QueueRepeatMode.OFF)
+				queue.setRepeatMode(0)
 				break
 			case 1:
-				queue.setRepeatMode(QueueRepeatMode.TRACK)
+				queue.setRepeatMode(1)
 				break
 			case 2:
-				queue.setRepeatMode(QueueRepeatMode.QUEUE)
+				queue.setRepeatMode(2)
 				break
 		}
 
