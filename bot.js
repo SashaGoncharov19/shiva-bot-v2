@@ -22,8 +22,7 @@ const { YtDlpPlugin } = require("@distube/yt-dlp")
 const { token, client_id } = require("./config.json");
 const { Player } = require("discord-player");
 
-const { QuickDB } = require("quick.db");
-const db = new QuickDB();
+const { PrismaClient } = require('@prisma/client');
 
 /**
  * From v13, specifying the intents is compulsory.
@@ -86,7 +85,7 @@ client.distube = new DisTube(client, {
 	plugins: [new YtDlpPlugin({ update: false })]
 });
 client.filters = {};
-client.db = db;
+client.database = new PrismaClient();
 
 /**********************************************************************/
 // Registration of Message-Based Legacy Commands.
