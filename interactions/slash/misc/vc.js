@@ -23,19 +23,24 @@ module.exports = {
 
 		switch (option) {
 			case 'init':
-				const DBGuildData = await client.db.get('serversData');
-				const guild = DBGuildData?.filter(x => x.guild === interaction.guild.id)
+				const guild = await client.database.servers.findUnique({
+					where: {
+						guild: interaction.guild.id
+					}
+				});
 
-				if (!guild.length) {
+				if (!guild) {
 					const category = await interaction.guild.channels.create({ name: "Shiva Bot", type: ChannelType.GuildCategory });
 
 					const channel = await category.children.create({ name: "[+]", type: ChannelType.GuildVoice });
 
-					await client.db.push('serversData', {
-						guild: channel.guild.id,
-						vcID: channel.id,
-						categoryID: category.id
-					});
+					await client.database.servers.create({
+						data: {
+							guild: channel.guild.id,
+							vcID: channel.id,
+							categoryID: category.id
+						}
+					})
 
 					answer = 'Готово.'
 				} else {
